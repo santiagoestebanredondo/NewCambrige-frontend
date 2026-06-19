@@ -14,6 +14,7 @@ import Modal from "../../components/shared/Modal";
 import PazYSalvoModal from "./PazYSalvoModal";
 import { Icon } from '@mdi/react';
 import { mdiAccountSchool,mdiHome,mdiHumanMaleBoard } from "@mdi/js";
+import Alert from "../../components/shared/Alert";
 
 
 const RectoriaEstudiantes = () => {
@@ -39,6 +40,12 @@ const RectoriaEstudiantes = () => {
   const [firmasDetalle, setFirmasDetalle] = useState(null);
   const [selloUrl, setSelloUrl] = useState(null);
   const [firmasUrls, setFirmasUrls] = useState({});
+  const [alerta, setAlerta] = useState({
+  isOpen: false,
+  type: "info",
+  title: "",
+  message: ""
+});
   const selectedMenu = "Estudiantes";
  
   const modulos = [
@@ -110,6 +117,7 @@ const descargarPazYSalvos = async () => {
       link.remove();
       window.URL.revokeObjectURL(url);
       setModalDescargaExitosa(true);
+      
       return;
     }
     const estudiantesParaDescargar = estudiantesFiltrados;
@@ -130,7 +138,14 @@ const descargarPazYSalvos = async () => {
     setModalDescargaExitosa(true);
   } catch (error) {
     console.error(error);
-    alert("Error al descargar los paz y salvo.");
+    setAlerta({
+      isOpen: true,
+      type: "error",
+      title: "Error",
+      message:
+        error?.response?.data?.detail ||
+        "Error descargando archivo"
+    });
   }
 };
 
@@ -183,13 +198,22 @@ const confirmarValidacionPazYSalvo = async () => {
     );
     await cargarEstudiantes(periodoId);
     setModalValidarPazSalvo(false);
-    alert("Paz y Salvo validado correctamente");
+    setAlerta({
+      isOpen: true,
+      type: "success",
+      title: "Proceso completado",
+      message: "Estudiante firmado correctamente"
+    });
   } catch (error) {
     console.error(error);
-    alert(
-      error?.response?.data?.detail ||
-      "Error al validar paz y salvo"
-    );
+    setAlerta({
+      isOpen: true,
+      type: "error",
+      title: "Error",
+      message:
+        error?.response?.data?.detail ||
+        "Error al firmar estudiante"
+    });
   }
 };
 
@@ -372,10 +396,20 @@ const verPazYSalvo = async () => {
             firmasUrls={firmasUrls}
           />
           <Modal
-          title={`¿Está seguro de que desea otorgar el paz y salvo a ${fila?.nombre || ""}?, Al confirmar esta acción, se validará que la persona ha cumplido con todos los requisitos y obligaciones correspondientes.`}
+          title={`VALIDACIÒN DE PAZ Y SALVO`}
           isOpen={modalValidarPazSalvo}
           onCancel={() => setModalValidarPazSalvo(false)}
           onAccept={confirmarValidacionPazYSalvo}
+          fields={[
+            {
+              key: "mensaje",
+              type: "label",
+              label:
+                `Está seguro de que desea otorgar el paz y salvo a ${fila?.nombre || ""}?, Al confirmar esta acción, se validará que la persona ha cumplido con todos los requisitos y obligaciones correspondientes.`,
+              className: "modal-success-message"
+            }
+          ]}
+          
         />
           <Modal
           title="PROCESO COMPLETADO"
@@ -392,6 +426,18 @@ const verPazYSalvo = async () => {
             }
           ]}
         />
+        <Alert
+  isOpen={alerta.isOpen}
+  type={alerta.type}
+  title={alerta.title}
+  message={alerta.message}
+  onClose={() =>
+    setAlerta(prev => ({
+      ...prev,
+      isOpen: false
+    }))
+  }
+/>
     </div>
   );
 };

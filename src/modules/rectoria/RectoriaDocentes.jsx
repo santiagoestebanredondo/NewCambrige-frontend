@@ -15,6 +15,7 @@ import ActionButtons from "../../components/shared/ActionButtons";
 import Modal from "../../components/shared/Modal";
 import { Icon } from '@mdi/react';
 import { mdiAccountSchool,mdiHome,mdiHumanMaleBoard } from "@mdi/js";
+import Alert from "../../components/shared/Alert";
 
 const RectoriaDocentes = () => {
   const [docentes, setDocentes] = useState([]);
@@ -131,10 +132,22 @@ const firmarDocente = async () => {
       periodoId
     );
     await cargarDocentes(periodoId);
-    alert("Docente firmado correctamente");
+    setAlerta({
+      isOpen: true,
+      type: "success",
+      title: "Proceso completado",
+      message: "Docente firmado correctamente"
+    });
   } catch (error) {
     console.error(error);
-    alert(error?.response?.data?.detail ||"Error al firmar docente");
+    setAlerta({
+      isOpen: true,
+      type: "error",
+      title: "Error",
+      message:
+        error?.response?.data?.detail ||
+        "Error al firmar docente"
+    });
   }
 };
 const cargarFirma = async (nombreModulo, usuarioId) => {
@@ -182,10 +195,14 @@ const descargarPazYSalvo = async () => {
     window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error(error);
-    alert(
-      error?.response?.data?.detail ||
-      "Error descargando PDF"
-    );
+    setAlerta({
+  isOpen: true,
+  type: "error",
+  title: "Error",
+  message:
+    error?.response?.data?.detail ||
+    "Error descargando archivo"
+});
   }
 };
 
@@ -256,9 +273,10 @@ const verPazYSalvoDocente = async () => {
           <ActionButtons
             filaSeleccionada={fila}
             botones={[
-              {label: "Ver Paz y Salvo",onClick: verPazYSalvoDocente,variante: "primary"},
-              {label: "Firmar Docente",onClick: () => setModalValidar(true),variante: "primary",disabled: !fila || fila.firmado === true},
-              {label: "Descargar Paz y Salvo",onClick: descargarPazYSalvo,variante: "primary",siempreActivo: true}
+              {label: "Validar Paz y Salvo",onClick: () => setModalValidar(true),variante: "primary",disabled: !fila || fila.firmado === true},
+              {label: "Descargar Paz y Salvo",onClick: descargarPazYSalvo,variante: "primary",siempreActivo: true},
+              {label: "Ver Paz y Salvo",onClick: verPazYSalvoDocente,variante: "primary"}
+              
             ]}
           />
         }
@@ -357,6 +375,15 @@ const verPazYSalvoDocente = async () => {
               await firmarDocente();
               setModalValidar(false);
             }}
+            fields={[
+            {
+              key: "mensaje",
+              type: "label",
+              label:
+                `Está seguro de que desea otorgar el paz y salvo a ${fila?.nombre || ""}?, Al confirmar esta acción, se validará que la persona ha cumplido con todos los requisitos y obligaciones correspondientes.`,
+              className: "modal-success-message"
+            }
+          ]}
           />
     </div>
   );

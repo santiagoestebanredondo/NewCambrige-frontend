@@ -98,7 +98,7 @@
 
 /* ── CAMPOS ── */
 .modal-fields {
-  display: grid;
+  text-align: center;
   grid-template-columns: repeat(2, minmax(250px, 1fr));
   gap: var(--space-4); /* ← antes var(--space-12), mucho menos espacio entre fields */
   margin: var(--space-6);
